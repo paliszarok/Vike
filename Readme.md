@@ -9,4 +9,6 @@
 
 ## How to run
 
-Documentation under development...
+You need a Vike ROM (`.vike` file) that you can drag over `Vike.exe`. These are created by writing programs in the Vike-specific programming language called *Vissembly* and compiling them using `Vike.exe`. Create a program in a `.vsm` file, drag it over `Vike.exe` and you'll get a `.vike` ROM.
+
+### No detailed documentation for now!
