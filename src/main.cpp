@@ -30,64 +30,27 @@ int main(int argc, char *argv[])
 {
     std::string Title = "Vike " + std::to_string(VIKE_MAJOR) + "." + std::to_string(VIKE_MINOR) + "." + std::to_string(VIKE_FIX) + " by Veress Bence Gyula " + __DATE__;
 
-    std::vector<std::pair<std::string, uint8_t>> ArgumentPriority;
-
     uint8_t WindowScale = 1;
 
-    if (argc < 2)
+    if (IsFileExtension(argv[1], ".vsm"))
     {
-        return false;
+        return Compile(argv[1]);
     }
-    else if (argc >= 2)
+    if (IsFileExtension(argv[1], ".vike"))
     {
-        for (int i = 1; i < argc; i++)
-        {
-            if (IsFileExtension(argv[i], ".vike"))
-            {
-                ArgumentPriority.push_back({argv[i], 1});
-            }
-            if (IsFileExtension(argv[i], ".vsm"))
-            {
-                ArgumentPriority.push_back({argv[i], 2});
-            }
-            if (std::string(argv[i]).substr(0, 3) == "ws:")
-            {
-                ArgumentPriority.push_back({argv[i], 0});
-            }
-        }
+        Filename = argv[1];
+        Cartridge.Load(Filename);
     }
-
-    std::sort(ArgumentPriority.begin(), ArgumentPriority.end(), [](const std::pair<std::string, uint8_t> &a, const std::pair<std::string, uint8_t> &b)
-              { return a.second > b.second; });
-
-    for (auto &Argument : ArgumentPriority)
+    for (uint8_t i = 2; i < argc; i++)
     {
-        if (IsFileExtension(Argument.first.c_str(), ".vike"))
+        if (std::strncmp(argv[i], "ws:", 3) == 0)
         {
-            Filename = Argument.first;
-            Cartridge.Load(Filename);
-        }
-        if (IsFileExtension(Argument.first.c_str(), ".vsm"))
-        {
-            return Compile(Argument.first);
-        }
-        if (Argument.first.substr(0, 3) == "ws:")
-        {
-            WindowScale = std::stoi(Argument.first.substr(3));
+            WindowScale = std::stoi(argv[i] + 3);
         }
     }
 
     std::cout << Title << " - Loading..." << std::endl;
     InitWindow(256 * WindowScale, 192 * WindowScale, Title.c_str());
-    InitAudioDevice();
-
-    Sound SquareSound1 = LoadSoundFromWave(SquareWave(440, 1.0f, 0.1f));
-    Sound SquareSound2 = LoadSoundFromWave(SquareWave(440, 1.0f, 0.1f));
-    Sound SquareSound3 = LoadSoundFromWave(SquareWave(440, 1.0f, 0.1f));
-    Sound SawtoothSound1 = LoadSoundFromWave(SawtoothWave(440, 1.0f, 0.1f));
-    Sound SawtoothSound2 = LoadSoundFromWave(SawtoothWave(440, 1.0f, 0.1f));
-    Sound SineSound = LoadSoundFromWave(SineWave(440, 1.0f, 0.1f));
-    Sound NoiseSound = LoadSoundFromWave(NoiseWave(1.0f, 0.1f));
 
     Image Screen = GenImageColor(256, 192, BLACK);
     Texture ScreenShow = LoadTextureFromImage(Screen);
@@ -96,12 +59,11 @@ int main(int argc, char *argv[])
 
     while (!WindowShouldClose())
     {
-        Play(SquareSound1, SquareSound2, SquareSound3, SawtoothSound1, SawtoothSound2, SineSound, NoiseSound);
-        DrawScreen(WindowScale, Screen, ScreenShow);
-        ProcessInput();
         Memory.FindExternal();
+        ProcessInput();
         Process();
-        ManageTools(WindowScale);
+        // ManageTools(WindowScale);
+        DrawScreen(WindowScale, Screen, ScreenShow);
     }
 
     std::cout << "\nPress any key to close Vike";
@@ -110,16 +72,6 @@ int main(int argc, char *argv[])
 
     UnloadTexture(ScreenShow);
     UnloadImage(Screen);
-
-    UnloadSound(NoiseSound);
-    UnloadSound(SineSound);
-    UnloadSound(SawtoothSound2);
-    UnloadSound(SawtoothSound1);
-    UnloadSound(SquareSound3);
-    UnloadSound(SquareSound2);
-    UnloadSound(SquareSound1);
-
-    CloseAudioDevice();
 
     CloseWindow();
     return 0;
