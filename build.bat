@@ -2,7 +2,7 @@
 if exist build\Vike.exe (
 del build\Vike.exe
 )
-g++ src\*.cpp -o build\Vike.exe -Wall -O2 -L C:\Dev\raylib -lraylib -lopengl32 -lgdi32 -lwinmm
+g++ src\*.cpp -o build\Vike.exe -Wall -O2 -I C:\Dev\raylib -L C:\Dev\raylib -lraylib -lopengl32 -lgdi32 -lwinmm
 IF %ERRORLEVEL% NEQ 0 (
 echo Build failed!
 pause
